@@ -1,0 +1,12 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+RWTexture2D<float4> Result;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float4 c = id.x == id.y ? float4(1,1,1,1) : float4(0,0,0,0);
+    Result[id.xy] = c;
+}
+
