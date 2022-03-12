@@ -2,12 +2,34 @@
 #pragma kernel CSMain
 
 RWTexture2D<float4> Result;
+float _DeltaTime;
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    float4 c = id.x == id.y ? float4(1,1,1,1) : float4(0,0,0,0);
-    //saaa
-    Result[id.xy] = c;
+    // dc
+    float4 currentValue = Result[id.xy];
+
+    // neighbour colors
+    float4 right = Result[id.xy + float2(0,1)];
+    float4 left = Result[id.xy + float2(0,-1)];
+    float4 up = Result[id.xy + float2(1,0)];
+    float4 down = Result[id.xy + float2(-1,0)];
+
+    // s
+    float4 average = (right + left + up + down) / 4;
+
+    // k
+    float k = 0.1;
+
+    // dn
+    float4 updatedValue = (currentValue + k*average) / 1 + k;
+
+    Result[id.xy] = updatedValue;
 }
 
+
+//void GaussSeidelDiffuse(float4 currentValue, float k, ) 
+//{
+    
+//}

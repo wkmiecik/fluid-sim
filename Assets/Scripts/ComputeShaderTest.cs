@@ -25,6 +25,7 @@ public class ComputeShaderTest : MonoBehaviour
 
     private void Update()
     {
+        updateShader.SetFloat("_DeltaTime", Time.deltaTime);
         updateShader.SetTexture(0, "Result", renderTexture);
         updateShader.Dispatch(0, renderTexture.width / 8, renderTexture.height / 8, 1);
     }
