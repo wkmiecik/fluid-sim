@@ -2,9 +2,15 @@ using UnityEngine;
 
 public class ComputeShaderTest : MonoBehaviour
 {
+    public int size = 64;
+
     public ComputeShader startShader;
     public ComputeShader updateShader;
-    private RenderTexture renderTexture;
+
+    private int mainFunction;
+    private int diffuseFunction;
+
+    private RenderTexture densityTexture;
 
     public MeshRenderer planeRenderer;
     private Material planeMat;
@@ -12,21 +18,31 @@ public class ComputeShaderTest : MonoBehaviour
     private void Start()
     {
         planeMat = planeRenderer.sharedMaterial;
+        mainFunction = updateShader.FindKernel("CSMain");
+        diffuseFunction = updateShader.FindKernel("Diff");
 
-        renderTexture = new RenderTexture(32, 32, 24);
-        renderTexture.enableRandomWrite = true;
-        renderTexture.Create();
+        densityTexture = new RenderTexture(size, size, 24);
+        densityTexture.enableRandomWrite = true;
+        densityTexture.Create();
+        planeMat.SetTexture("_Texture", densityTexture);
 
-        planeMat.SetTexture("_Texture", renderTexture);
 
-        startShader.SetTexture(0, "Result", renderTexture);
-        startShader.Dispatch(0, renderTexture.width / 8, renderTexture.height / 8, 1);
+        updateShader.SetTexture(mainFunction, "DensityTex", densityTexture);
+        updateShader.SetTexture(diffuseFunction, "DensityTex", densityTexture);
+        updateShader.SetInt("N", size);
+
+
+        updateShader.Dispatch(mainFunction, densityTexture.width / 8, densityTexture.height / 8, 1);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
+        // Diffuse
         updateShader.SetFloat("_DeltaTime", Time.deltaTime);
-        updateShader.SetTexture(0, "Result", renderTexture);
-        updateShader.Dispatch(0, renderTexture.width / 8, renderTexture.height / 8, 1);
+
+        for (int i = 0; i < 1; i++)
+        {
+            updateShader.Dispatch(diffuseFunction, densityTexture.width / 8, densityTexture.height / 8, 1);
+        }
     }
 }

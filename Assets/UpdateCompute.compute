@@ -1,35 +1,54 @@
-// Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel CSMain
+#pragma kernel Diff
 
-RWTexture2D<float4> Result;
+// x, x0
+RWTexture2D<float4> DensityTex;
+RWTexture2D<float4> VelocityTex;
+int N;
 float _DeltaTime;
 
 [numthreads(8,8,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
 {
-    // dc
-    float4 currentValue = Result[id.xy];
-
-    // neighbour colors
-    float4 right = Result[id.xy + float2(0,1)];
-    float4 left = Result[id.xy + float2(0,-1)];
-    float4 up = Result[id.xy + float2(1,0)];
-    float4 down = Result[id.xy + float2(-1,0)];
-
-    // s
-    float4 average = (right + left + up + down) / 4;
-
-    // k
-    float k = 0.1;
-
-    // dn
-    float4 updatedValue = (currentValue + k*average) / 1 + k;
-
-    Result[id.xy] = updatedValue;
+    float4 c = (id.x == id.y || id.x + id.y == 63) ? float4(1,1,0,0) : float4(0,0,0,0);
+    //float4 c = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+    DensityTex[id.xy] = c;
 }
 
 
-//void GaussSeidelDiffuse(float4 currentValue, float k, ) 
-//{
+
+[numthreads(8,8,1)]
+void Diff (uint3 id : SV_DispatchThreadID)
+{
+    // neighbours
+    float4 this = DensityTex[id.xy];
+    float4 right = DensityTex[id.xy + float2(0,1)];
+    float4 left = DensityTex[id.xy + float2(0,-1)];
+    float4 up = DensityTex[id.xy + float2(1,0)];
+    float4 down = DensityTex[id.xy + float2(-1,0)];
+
+    float a = _DeltaTime * 1 * (N - 2) * (N - 2);
+    float cRecip = 1.0 / (1 + 6 * a);   
     
+    this.x = this.y + a * (right.x + left.x + up.x + down.x) * cRecip;
+    DensityTex[id.xy] = this;
+}
+
+
+
+//static void set_bnd(int b, RWTexture2D<float4> tex)
+//{
+//    for (int i = 1; i < N - 1; i++) {
+//        x[IX(i, 0  )] = b == 2 ? -x[IX(i, 1  )] : x[IX(i, 1 )];
+//        x[IX(i, N-1)] = b == 2 ? -x[IX(i, N-2)] : x[IX(i, N-2)];
+//    }
+//    for (int j = 1; j < N - 1; j++) {
+//        x[IX(0, j)] = b == 1 ? -x[IX(1, j)] : x[IX(1, j)];
+//        x[IX(N-1, j)] = b == 1 ? -x[IX(N-2, j)] : x[IX(N-2, j)];
+//    }
+
+//    x[IX(0, 0)] = 0.5f * (x[IX(1, 0)] + x[IX(0, 1)]);
+//    x[IX(0, N-1)] = 0.5f * (x[IX(1, N-1)] + x[IX(0, N-2)]);
+//    x[IX(N-1, 0)] = 0.5f * (x[IX(N-2, 0)] + x[IX(N-1, 1)]);
+//    x[IX(N-1, N-1)] = 0.5f * (x[IX(N-2, N-1)] + x[IX(N-1, N-2)]);
 //}
