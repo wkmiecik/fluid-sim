@@ -50,22 +50,22 @@ public class fluid : MonoBehaviour
             int x = (int)((mouse.x) * N);
             int y = (int)((mouse.y) * N);
 
-            Vector3 mouseDrag = mousePrev - mouse;
+            Vector3 mouseDrag = mouse - mousePrev;
             mousePrev = mouse;
 
-            for (int i = -1; i <= 1; i++)
+            for (int i = -3; i <= 3; i++)
             {
-                for (int j = -1; j <= 1; j++)
+                for (int j = -3; j <= 3; j++)
                 {
-                    x = Mathf.Clamp(x+i, 1, N - 2);
-                    y = Mathf.Clamp(y+j, 1, N - 2);
-                    addDensity(x, y, 100);
-                    addVelocity(x, y, Mathf.Clamp(mouseDrag.x * 10000, 0, 1000), Mathf.Clamp(mouseDrag.y * 10000, 0, 1000));
+                    int xClamp = Mathf.Clamp(x+i, 1, N - 2);
+                    int yClamp = Mathf.Clamp(y+j, 1, N - 2);
+                    addDensity(xClamp, yClamp, 200);
+                    //addVelocity(x, y, Mathf.Clamp(mouseDrag.x * 10000, 0, 100), Mathf.Clamp(mouseDrag.y * 10000, 0, 100));
+                    addVelocity(xClamp, yClamp, 0, 10);
                 }
             }
         }
 
-        //addStaticVelocity(0,-100f);
         Step();
         draw_dens();
         //draw_vel();
@@ -99,7 +99,7 @@ public class fluid : MonoBehaviour
         {
             for (int j = 0; j < N; j++)
             {
-                float value = density[i, j] / 100;
+                float value = density[i, j] / 400;
                 densityTexture.SetPixel(i, j, new Color(value, value, value));
             }
         }
@@ -129,17 +129,6 @@ public class fluid : MonoBehaviour
     {
         Vx[x, y] += velX;
         Vy[x, y] += velY;
-    }
-    private void addStaticVelocity(float velX, float velY)
-    {
-        for (int i = 1; i < N-2; i++)
-        {
-            for (int j = 1; j < N-2; j++)
-            {
-                Vx[i, j] += velX;
-                Vy[i, j] += velY;
-            }
-        }
     }
 
 
@@ -215,20 +204,38 @@ public class fluid : MonoBehaviour
     }
 
 
+    //void set_bnd(int b, float[,] x)
+    //{
+    //    for (int i = 1; i < N - 1; i++)
+    //    {
+    //        x[0, i] = b == 1 ? -x[1, i] : x[1, i];
+    //        x[N - 1, i] = b == 1 ? -x[N - 2, i] : x[N - 2, i];
+    //        x[i, 0] = b == 2 ? -x[i, 1] : x[i, 1];
+    //        x[i, N - 1] = b == 2 ? -x[i, N - 2] : x[i, N - 2];
+    //    }
+
+    //    x[0, 0] =           0.33f * (x[1, 0]     + x[0, 1]);
+    //    x[0, N - 1] =       0.33f * (x[1, N - 1] + x[0, N - 2]);
+    //    x[N - 1, 0] =       0.33f * (x[N - 2, 0]     + x[N - 1, 1]);
+    //    x[N - 1, N - 1] =   0.33f * (x[N - 2, N - 1] + x[N - 1, N - 2]);
+    //}
     void set_bnd(int b, float[,] x)
     {
         for (int i = 1; i < N - 1; i++)
         {
-            x[0, i] = b == 1 ? -x[1, i] : x[1, i];
-            x[N - 1, i] = b == 1 ? -x[N - 2, i] : x[N - 2, i];
             x[i, 0] = b == 2 ? -x[i, 1] : x[i, 1];
             x[i, N - 1] = b == 2 ? -x[i, N - 2] : x[i, N - 2];
         }
+        for (int j = 1; j < N - 1; j++)
+        {
+            x[0, j] = b == 1 ? -x[1, j] : x[1, j];
+            x[N - 1, j] = b == 1 ? -x[N - 2, j] : x[N - 2, j];
+        }
 
-        x[0, 0] =           0.33f * (x[1, 0]     + x[0, 1]);
-        x[0, N - 1] =       0.33f * (x[1, N - 1] + x[0, N - 2]);
-        x[N - 1, 0] =       0.33f * (x[N - 2, 0]     + x[N - 1, 1]);
-        x[N - 1, N - 1] =   0.33f * (x[N - 2, N - 1] + x[N - 1, N - 2]);
+        x[0, 0] = 0.5f * (x[1, 0] + x[0, 1]);
+        x[0, N - 1] = 0.5f * (x[1, N - 1] + x[0, N - 2]);
+        x[N - 1, 0] = 0.5f * (x[N - 2, 0] + x[N - 1, 1]);
+        x[N - 1, N - 1] = 0.5f * (x[N - 2, N - 1] + x[N - 1, N - 2]);
     }
 
 
