@@ -133,6 +133,7 @@ GameObject:
   m_Component:
   - component: {fileID: 211166799}
   - component: {fileID: 211166798}
+  - component: {fileID: 211166800}
   m_Layer: 0
   m_Name: Compute
   m_TagString: Untagged
@@ -147,11 +148,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 211166797}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0f3a6945bd06bc14f88d3e42ba18da2f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  size: 64
   startShader: {fileID: 7200000, guid: 6cb4540653c573b499ce3c9381726446, type: 3}
   updateShader: {fileID: 7200000, guid: aaf18e8f5a594b74a84cafe7454704f9, type: 3}
   planeRenderer: {fileID: 905225122}
@@ -169,6 +171,24 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &211166800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 211166797}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 612a806fc9dcf92409e77ce900af659b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  visc: 0.1
+  diff: 0.05
+  dt: 0.01
+  N: 62
+  planeRenderer: {fileID: 905225122}
+  adding: 0
 --- !u!1 &798491818
 GameObject:
   m_ObjectHideFlags: 0
